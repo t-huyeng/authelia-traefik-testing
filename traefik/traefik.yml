@@ -1,0 +1,42 @@
+entrypoints:
+  web:
+    address: ":80"
+    # http:
+    #   redirections:
+    #     entryPoint:
+    #       to: websecure
+    #       scheme: https
+  websecure:
+    address: ":443"
+
+api:
+  insecure: true
+  dashboard: true
+  debug: false
+
+log:
+  level: DEBUG
+  filePath: "/logs/log-file.log"
+  format: json
+
+accessLog:
+  # format: json
+  filePath: "/logs/access.log"
+  bufferingSize: 100
+
+providers:
+  docker:
+    endpoint: "unix:///var/run/docker.sock"
+    network: web-net
+    exposedByDefault: false
+
+
+certificatesResolvers:
+  myresolver:
+    acme:
+      email: MAIL #change here
+      storage: /letsencrypt/acme.json
+      httpChallenge:
+        # used during the challenge
+        entryPoint: web
+      tlschallenge: true

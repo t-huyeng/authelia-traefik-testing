@@ -1,0 +1,7 @@
+authelia    | time="2021-07-28T10:51:17+02:00" level=debug msg="Mark authentication attempt made by user admin" method=POST path=/api/firstfactor remote_ip=172.20.1.172
+authelia    | time="2021-07-28T10:51:17+02:00" level=debug msg="Credentials validation of user admin is ok" method=POST path=/api/firstfactor remote_ip=172.20.1.172
+authelia    | time="2021-07-28T10:51:17+02:00" level=debug msg="Check authorization of subject username=admin groups=admins,dev ip=172.20.1.172 and object https://secure.diss.example.com/ (method GET)."
+authelia    | time="2021-07-28T10:51:17+02:00" level=debug msg="Required level for the URL https://secure.diss.example.com/ is 1" method=POST path=/api/firstfactor remote_ip=172.20.1.172
+authelia    | time="2021-07-28T10:51:17+02:00" level=debug msg="Redirection URL https://secure.diss.example.com/ is safe" method=POST path=/api/firstfactor remote_ip=172.20.1.172
+authelia    | time="2021-07-28T10:51:17+02:00" level=debug msg="Check authorization of subject username= groups= ip=172.20.1.172 and object https://secure.diss.example.com/ (method GET)."
+authelia    | time="2021-07-28T10:51:17+02:00" level=info msg="Access to https://secure.diss.example.com/ (method GET) is not authorized to user <anonymous>, responding with status code 302 with location redirect to https://auth.diss.example.com?rd=https%3A%2F%2Fsecure.diss.example.com%2F&rm=GET" method=GET path=/api/verify remote_ip=172.20.1.172

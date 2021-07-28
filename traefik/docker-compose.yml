@@ -1,0 +1,28 @@
+version: "3.7"
+
+services:
+  gateway:
+    image: traefik:v2.4.8
+    container_name: traefik
+    restart: unless-stopped
+    ports:
+    - "8081:8080"
+    - "80:80"
+    - "443:443"
+    volumes:
+    - /var/run/docker.sock:/var/run/docker.sock
+    - "./traefik.yaml:/etc/traefik/traefik.yaml"
+    - "./logs:/logs"
+    - "./letsencrypt:/letsencrypt"
+    labels:
+      - "traefik.docker.network=web-net"
+    networks:
+     - web-net
+    environment:
+      - TZ=Europe/Berlin
+    command:
+      - --accesslog.fields.names.StartUTC=drop
+
+networks:
+  web-net:
+    external: true

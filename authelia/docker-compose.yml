@@ -1,0 +1,92 @@
+version: '3.3'
+
+
+networks:
+    web-net:
+      external: true
+
+secrets:
+  jwt:
+    file: ./config/secrets/jwt
+  session:
+    file: ./config/secrets/session
+
+services:
+  authelia:
+    # image: authelia/authelia
+    image: authelia/authelia:master
+    container_name: authelia
+    secrets:
+      - jwt
+      - session
+    user: "1000:1000"
+    volumes:
+      - ./config:/config
+    networks:
+      - web-net
+    labels:
+      - 'traefik.enable=true'
+      - traefik.docker.network=web-net
+      - 'traefik.http.routers.authelia.rule=Host(`auth.diss.example.com`)'
+      - 'traefik.http.routers.authelia.entrypoints=websecure'
+      - 'traefik.http.routers.authelia.tls=true'
+      - 'traefik.http.routers.authelia.tls.certresolver=myresolver'
+      - 'traefik.http.middlewares.authelia.forwardauth.address=http://authelia:9091/api/verify?rd=https://auth.diss.example.com'  # yamllint disable-line rule:line-length
+      - 'traefik.http.middlewares.authelia.forwardauth.trustForwardHeader=true'
+      - 'traefik.http.middlewares.authelia.forwardauth.authResponseHeaders=Remote-User,Remote-Groups,Remote-Name,Remote-Email'  # yamllint disable-line rule:line-length
+    expose:
+      - 9091
+    restart: unless-stopped
+    healthcheck:
+      disable: true
+    environment:
+      - AUTHELIA_SESSION_SECRET_FILE=/run/secrets/session
+      - AUTHELIA_JWT_SECRET_FILE=/run/secrets/jwt
+      - TZ=Europe/Berlin
+
+  redis:
+    image: redis:alpine
+    container_name: redis
+    volumes:
+      - ./redis:/data
+    networks:
+      - web-net
+    expose:
+      - 6379
+    restart: unless-stopped
+    environment:
+      - TZ=Europe/Berlin
+
+  secure:
+    image: traefik/whoami
+    container_name: secure
+    networks:
+      - web-net
+    labels:
+      - 'traefik.enable=true'
+      - traefik.docker.network=web-net
+      - 'traefik.http.routers.secure.rule=Host(`secure.diss.example.com`)'
+      - 'traefik.http.routers.secure.entrypoints=websecure'
+      - 'traefik.http.routers.secure.tls=true'
+      - 'traefik.http.routers.secure.tls.certresolver=myresolver'
+      - 'traefik.http.routers.secure.middlewares=authelia@docker'
+    expose:
+      - 80
+    restart: unless-stopped
+
+  public:
+    image: traefik/whoami
+    container_name: public
+    networks:
+      - web-net
+    labels:
+      - 'traefik.enable=true'
+      - traefik.docker.network=web-net
+      - 'traefik.http.routers.public.rule=Host(`public.diss.example.com`)'
+      - 'traefik.http.routers.public.entrypoints=websecure'
+      - 'traefik.http.routers.public.tls=true'
+      - 'traefik.http.routers.public.tls.certresolver=myresolver'
+      - 'traefik.http.routers.public.middlewares=authelia@docker'
+    expose:
+      - 80
+    restart: unless-stopped
